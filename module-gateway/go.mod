@@ -9,13 +9,13 @@ require (
 	github.com/bing127/enterprise-agent/module-infra v0.0.0
 	github.com/bing127/enterprise-agent/module-knowledge v0.0.0
 	github.com/bing127/enterprise-agent/module-pkg v0.0.0
+	github.com/bing127/enterprise-agent/resource v0.0.0
 	github.com/cloudwego/hertz v0.10.4
 	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.7.0
 	github.com/hertz-contrib/swagger v0.1.1
 	github.com/sony/gobreaker v0.5.0
 	github.com/swaggo/files v1.0.1
-	github.com/swaggo/swag v1.16.6
 	go.uber.org/zap v1.27.0
 )
 
@@ -61,6 +61,7 @@ require (
 	github.com/go-openapi/validate v0.25.2 // indirect
 	github.com/go-redis/redis/v8 v8.11.5 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
+	github.com/golang-jwt/jwt/v5 v5.2.2 // indirect
 	github.com/goph/emperror v0.17.2 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
@@ -73,6 +74,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/slongfield/pyfmt v0.0.0-20220222012616-ea85ff4c361f // indirect
+	github.com/swaggo/swag v1.16.6 // indirect
 	github.com/tidwall/gjson v1.19.0 // indirect
 	github.com/tidwall/match v1.2.0 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
@@ -100,6 +102,7 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260504160031-60b97b32f348 // indirect
 	google.golang.org/grpc v1.81.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
+	gopkg.in/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
@@ -110,4 +113,5 @@ replace (
 	github.com/bing127/enterprise-agent/module-infra => ../module-infra
 	github.com/bing127/enterprise-agent/module-knowledge => ../module-knowledge
 	github.com/bing127/enterprise-agent/module-pkg => ../module-pkg
+	github.com/bing127/enterprise-agent/resource => ../resource
 )

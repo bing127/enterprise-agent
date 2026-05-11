@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/bing127/enterprise-agent/module-core/service"
@@ -149,10 +150,10 @@ func (h *AuthHandler) Login(ctx context.Context, c *app.RequestContext) {
 		Password: req.Password,
 	})
 	if err != nil {
-		switch err {
-		case service.ErrUserNotFound, service.ErrWrongPassword:
+		switch {
+		case errors.Is(err, service.ErrUserNotFound), errors.Is(err, service.ErrWrongPassword):
 			response.Unauthorized(ctx, c, "invalid email or password")
-		case service.ErrUserNotActive:
+		case errors.Is(err, service.ErrUserNotActive):
 			response.Forbidden(ctx, c, "account is not active")
 		default:
 			response.InternalError(ctx, c, err.Error())

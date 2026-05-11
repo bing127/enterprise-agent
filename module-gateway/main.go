@@ -28,12 +28,13 @@ import (
 	conversationHandler "github.com/bing127/enterprise-agent/module-conversation/handler/conversation"
 	conversationService "github.com/bing127/enterprise-agent/module-conversation/service"
 	coreHandler "github.com/bing127/enterprise-agent/module-core/handler"
+	coreRepo "github.com/bing127/enterprise-agent/module-core/repo"
 	coreService "github.com/bing127/enterprise-agent/module-core/service"
-	_ "github.com/bing127/enterprise-agent/module-gateway/docs" // swag 生成文档
 	"github.com/bing127/enterprise-agent/module-gateway/router"
 	knowledgeHandler "github.com/bing127/enterprise-agent/module-knowledge/handler/knowledge"
 	knowledgeService "github.com/bing127/enterprise-agent/module-knowledge/service"
 	"github.com/bing127/enterprise-agent/module-pkg/logger"
+	_ "github.com/bing127/enterprise-agent/resource/docs" // swag 生成文档
 	"go.uber.org/zap"
 )
 
@@ -47,7 +48,23 @@ func main() {
 	if logLevel == "" {
 		logLevel = "info"
 	}
-	logger.Init(logLevel, env)
+	logOutput := os.Getenv("LOG_OUTPUT") // "stdout" | "file" | "both"
+	if logOutput == "" {
+		logOutput = "both"
+	}
+	logFilePath := os.Getenv("LOG_FILE_PATH")
+	if logFilePath == "" {
+		logFilePath = "../resource/logs/app.log"
+	}
+	logger.InitWithConfig(logger.Config{
+		Level:      logLevel,
+		Env:        env,
+		Output:     logOutput,
+		FilePath:   logFilePath,
+		MaxSizeMB:  100,
+		MaxBackups: 7,
+		MaxAgeDays: 30,
+	})
 	defer logger.Sync()
 
 	log := logger.L().Named("main")
@@ -69,11 +86,16 @@ func main() {
 	knowledgeSvc := knowledgeService.NewKnowledgeService(nil)
 	conversationSvc := conversationService.NewConversationService(nil, nil)
 
-	// Auth 服务：repo / emailer 暂用 nil，正式接入后替换
-	authSvc := coreService.NewAuthService(nil, nil, nil, coreService.AuthConfig{
-		JWTSecret: jwtSecret,
-		JWTTTL:    jwtTTL,
-	})
+	// Auth 服务：使用内存实现（开发环境），正式接入后替换为数据库实现
+	authSvc := coreService.NewAuthService(
+		coreRepo.NewInMemUserRepo(),
+		coreRepo.NewInMemEmailCodeRepo(),
+		coreRepo.NewLogEmailSender(),
+		coreService.AuthConfig{
+			JWTSecret: jwtSecret,
+			JWTTTL:    jwtTTL,
+		},
+	)
 
 	ah := agentHandler.NewAgentHandler(agentSvc)
 	kh := knowledgeHandler.NewKnowledgeHandler(knowledgeSvc)

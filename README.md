@@ -205,6 +205,7 @@ make run        # 编译并以生产模式运行
 | `make docker-up` | 启动所有基础设施容器（ES / Redis / Weaviate） |
 | `make docker-down` | 停止所有容器 |
 | `make docker-logs` | 实时查看 gateway 容器日志 |
+| `make new-module NAME=xxx` | 从模板脚手架创建新业务模块 |
 | `make clean` | 清除编译产物（`tmp/` 目录） |
 | `make help` | 打印所有可用命令及说明 |
 
@@ -214,13 +215,23 @@ make run        # 编译并以生产模式运行
 
 ### 新增业务模块
 
-1. 在根目录创建 `module-xxx/`，按 `domain → service → handler → wire` 结构组织代码
-2. 在 `go.work` 的 `use` 块中添加 `./module-xxx`
-3. 在 `module-gateway/go.mod` 的 `require` 和 `replace` 块中引入新模块
-4. 在 `module-gateway/router/router.go` 中注册新路由
-5. 在 `module-gateway/main.go` 中初始化新 Handler
-6. 执行 `make wire` 更新依赖注入代码
-7. 执行 `make swagger` 更新 API 文档
+使用脚手架命令一键生成模块骨架：
+
+```bash
+make new-module NAME=foo
+```
+
+命令会将 `resource/template/module-xxx/` 复制为 `module-foo/`，并自动替换所有占位符。
+
+生成后需手动完成以下步骤：
+
+1. 在 `go.work` 的 `use` 块中添加 `./module-foo`
+2. 在 `module-gateway/go.mod` 的 `require` 和 `replace` 块中引入新模块
+3. 在 `module-gateway/router/router.go` 中注册路由
+4. 在 `module-gateway/main.go` 中初始化 Handler
+5. 执行 `make wire && make swagger` 更新依赖注入代码和 API 文档
+
+模板位于 `resource/template/module-xxx/`，包含完整的 `domain / service / handler / wire` 骨架，可按需修改后作为团队标准模板。
 
 ### 依赖注入（Wire）
 

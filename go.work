@@ -9,4 +9,5 @@ use (
 	./module-infra
 	./module-knowledge
 	./module-pkg
+	./resource
 )

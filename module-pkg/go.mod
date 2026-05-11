@@ -6,9 +6,11 @@ require (
 	github.com/cloudwego/hertz v0.10.4
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	go.uber.org/zap v1.27.0
+	gopkg.in/lumberjack.v2 v2.0.0
 )
 
 require (
+	github.com/BurntSushi/toml v1.6.0 // indirect
 	github.com/bytedance/gopkg v0.1.4 // indirect
 	github.com/bytedance/sonic v1.15.1 // indirect
 	github.com/bytedance/sonic/loader v0.5.1 // indirect
@@ -25,4 +27,6 @@ require (
 	golang.org/x/arch v0.27.0 // indirect
 	golang.org/x/sys v0.44.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

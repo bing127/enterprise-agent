@@ -6,6 +6,7 @@ import (
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"gopkg.in/lumberjack.v2"
 )
 
 var (
@@ -13,19 +14,37 @@ var (
 	once   sync.Once
 )
 
-// Init 初始化全局 logger。建议在 main() 最开始调用一次。
+// Config 日志配置
+type Config struct {
+	Level      string // "debug" | "info" | "warn" | "error"
+	Env        string // "dev" | "prod"
+	Output     string // "stdout" | "file" | "both"
+	FilePath   string // 日志文件路径
+	MaxSizeMB  int    // 单文件最大 MB
+	MaxBackups int    // 保留备份数
+	MaxAgeDays int    // 最大保留天数（天）
+}
+
+// Init 初始化全局 logger（仅 stdout）。建议在 main() 最开始调用一次。
 // level: "debug" | "info" | "warn" | "error"
 // env:   "dev" | "prod"
 func Init(level, env string) {
 	once.Do(func() {
-		global = newLogger(level, env)
+		global = newLogger(Config{Level: level, Env: env, Output: "stdout"})
+	})
+}
+
+// InitWithConfig 初始化全局 logger，支持文件输出。
+func InitWithConfig(cfg Config) {
+	once.Do(func() {
+		global = newLogger(cfg)
 	})
 }
 
 // L 返回全局 logger，未初始化时返回默认 info 级别 logger。
 func L() *zap.Logger {
 	if global == nil {
-		global = newLogger("info", "prod")
+		global = newLogger(Config{Level: "info", Env: "prod", Output: "stdout"})
 	}
 	return global
 }
@@ -37,9 +56,9 @@ func Sync() {
 	}
 }
 
-func newLogger(level, env string) *zap.Logger {
+func newLogger(cfg Config) *zap.Logger {
 	var zapLevel zapcore.Level
-	if err := zapLevel.UnmarshalText([]byte(level)); err != nil {
+	if err := zapLevel.UnmarshalText([]byte(cfg.Level)); err != nil {
 		zapLevel = zapcore.InfoLevel
 	}
 
@@ -49,25 +68,46 @@ func newLogger(level, env string) *zap.Logger {
 	encCfg.EncodeLevel = zapcore.CapitalLevelEncoder
 
 	var encoder zapcore.Encoder
-	if env == "dev" {
-		// 开发环境：彩色、易读的控制台格式
+	if cfg.Env == "dev" {
 		devCfg := zap.NewDevelopmentEncoderConfig()
 		devCfg.EncodeTime = zapcore.ISO8601TimeEncoder
 		devCfg.EncodeLevel = zapcore.CapitalColorLevelEncoder
 		encoder = zapcore.NewConsoleEncoder(devCfg)
 	} else {
-		// 生产环境：JSON 结构化日志
 		encoder = zapcore.NewJSONEncoder(encCfg)
 	}
 
-	core := zapcore.NewCore(
-		encoder,
-		zapcore.AddSync(os.Stdout),
-		zapLevel,
-	)
+	stdoutWriter := zapcore.AddSync(os.Stdout)
+
+	var core zapcore.Core
+	switch cfg.Output {
+	case "file":
+		fileWriter := zapcore.AddSync(&lumberjack.Logger{
+			Filename:   cfg.FilePath,
+			MaxSize:    cfg.MaxSizeMB,
+			MaxBackups: cfg.MaxBackups,
+			MaxAge:     cfg.MaxAgeDays,
+			Compress:   true,
+		})
+		core = zapcore.NewCore(encoder, fileWriter, zapLevel)
+	case "both":
+		fileWriter := zapcore.AddSync(&lumberjack.Logger{
+			Filename:   cfg.FilePath,
+			MaxSize:    cfg.MaxSizeMB,
+			MaxBackups: cfg.MaxBackups,
+			MaxAge:     cfg.MaxAgeDays,
+			Compress:   true,
+		})
+		core = zapcore.NewTee(
+			zapcore.NewCore(encoder, stdoutWriter, zapLevel),
+			zapcore.NewCore(encoder, fileWriter, zapLevel),
+		)
+	default: // "stdout"
+		core = zapcore.NewCore(encoder, stdoutWriter, zapLevel)
+	}
 
 	opts := []zap.Option{zap.AddCaller(), zap.AddCallerSkip(0)}
-	if env == "dev" {
+	if cfg.Env == "dev" {
 		opts = append(opts, zap.AddStacktrace(zapcore.ErrorLevel))
 	}
 
