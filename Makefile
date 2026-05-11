@@ -48,7 +48,7 @@ swagger: ## 生成 Swagger 文档（自动安装 swag）
 
 wire: ## 重新生成所有 Wire 代码（自动安装 wire）
 	@command -v wire >/dev/null 2>&1 || go install github.com/google/wire/cmd/wire@latest
-	@for mod in module-agent module-knowledge module-conversation module-gateway; do \
+	@for mod in module-agent module-knowledge module-conversation module-core module-gateway; do \
 		echo "→ wire $$mod"; \
 		(cd $$mod/wire && wire); \
 	done
