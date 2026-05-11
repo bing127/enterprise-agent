@@ -1,0 +1,74 @@
+# Enterprise Agent 基础配置文件
+# 通过环境变量 APP_ENV 指定环境（local / dev / prod），默认 local
+
+app:
+  name: enterprise-agent
+  env: local
+  port: 8080
+  debug: true
+
+# HTTP 服务器（Hertz）
+server:
+  host: "0.0.0.0"
+  port: 8080
+  read_timeout: 30s
+  write_timeout: 30s
+  max_request_body_size: 10485760  # 10 MB
+
+# JWT 鉴权
+auth:
+  secret_key: "change-me-in-production"
+  token_ttl: 7200  # 秒，2 小时
+  refresh_ttl: 604800  # 秒，7 天
+
+# Elasticsearch
+elasticsearch:
+  addresses:
+    - "http://localhost:9200"
+  username: ""
+  password: ""
+  index_prefix: "enterprise-agent"
+
+# Weaviate 向量数据库
+weaviate:
+  scheme: "http"
+  host: "localhost:8088"
+  grpc_port: 50051
+  api_key: ""
+
+# Redis
+redis:
+  addr: "localhost:6379"
+  password: ""
+  db: 0
+  pool_size: 10
+  dial_timeout: 5s
+  read_timeout: 3s
+  write_timeout: 3s
+
+# AI 模型（Eino ChatModel）
+ai:
+  provider: "openai"  # openai | ark | qwen
+  openai:
+    api_key: "sk-xxx"
+    base_url: "https://api.openai.com/v1"
+    model: "gpt-4o"
+    temperature: 0.7
+    max_tokens: 2048
+  ark:
+    api_key: ""
+    endpoint_id: ""
+    region: "cn-beijing"
+  qwen:
+    api_key: ""
+    model: "qwen-max"
+
+# 日志
+log:
+  level: "info"       # debug | info | warn | error
+  format: "json"      # json | text
+  output: "stdout"    # stdout | file
+  file_path: "./logs/app.log"
+  max_size: 100       # MB
+  max_backups: 7
+  max_age: 30         # 天

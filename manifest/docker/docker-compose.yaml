@@ -1,0 +1,97 @@
+name: enterprise-agent
+
+services:
+  # ── Application ─────────────────────────────────────────────────────────────
+  gateway:
+    build:
+      context: ..
+      dockerfile: manifest/Dockerfile
+    container_name: enterprise-agent-gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      APP_ENV: dev
+      ADDR: ":8080"
+      LOG_LEVEL: debug
+      RESOURCE_DIR: /app/config
+      JWT_SECRET_KEY: "change-me-in-dev"
+    volumes:
+      - ./config:/app/config:ro
+      - ../resource/logs:/app/resource/logs
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      weaviate:
+        condition: service_started
+    networks:
+      - agent-net
+
+  # ── Elasticsearch ────────────────────────────────────────────────────────────
+  elasticsearch:
+    image: elasticsearch:8.13.0
+    container_name: enterprise-agent-es
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\"\\|\"status\":\"yellow\"'"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    networks:
+      - agent-net
+
+  # ── Redis ────────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: enterprise-agent-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - agent-net
+
+  # ── Weaviate ─────────────────────────────────────────────────────────────────
+  weaviate:
+    image: semitechnologies/weaviate:1.25.0
+    container_name: enterprise-agent-weaviate
+    restart: unless-stopped
+    ports:
+      - "8088:8080"
+      - "50051:50051"
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
+      PERSISTENCE_DATA_PATH: /var/lib/weaviate
+      DEFAULT_VECTORIZER_MODULE: none
+      CLUSTER_HOSTNAME: node1
+    volumes:
+      - weaviate_data:/var/lib/weaviate
+    networks:
+      - agent-net
+
+volumes:
+  es_data:
+  redis_data:
+  weaviate_data:
+
+networks:
+  agent-net:
+    driver: bridge

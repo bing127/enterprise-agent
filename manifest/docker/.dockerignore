@@ -1,0 +1,26 @@
+# 编译产物
+tmp/
+bin/
+
+# 运行时产物
+resource/logs/
+*.log
+
+# Go 工具链缓存
+vendor/
+.cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# 测试覆盖率
+*.out
+*.coverage
+
+# macOS
+.DS_Store
+
+# Air 热重载日志
+tmp/build-errors.log

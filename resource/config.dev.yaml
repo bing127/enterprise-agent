@@ -1,0 +1,28 @@
+# Enterprise Agent 开发环境配置
+# 继承自 config.yaml，仅覆盖差异项
+
+app:
+  env: dev
+  debug: true
+
+elasticsearch:
+  addresses:
+    - "http://dev-es.internal:9200"
+  username: "elastic"
+  password: "dev-password"
+
+weaviate:
+  scheme: "http"
+  host: "dev-weaviate.internal:8088"
+
+redis:
+  addr: "dev-redis.internal:6379"
+  password: "dev-password"
+
+ai:
+  openai:
+    model: "gpt-4o-mini"  # 开发环境使用低价模型
+
+log:
+  level: "debug"
+  format: "text"

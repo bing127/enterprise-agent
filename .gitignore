@@ -1,0 +1,20 @@
+# 编译产物
+tmp/
+bin/
+
+# 日志
+resource/logs/
+*.log
+
+# Go
+vendor/
+*.out
+*.coverage
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
