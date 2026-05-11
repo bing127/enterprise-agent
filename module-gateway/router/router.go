@@ -12,8 +12,6 @@ import (
 	knowledgeHandler "github.com/bing127/enterprise-agent/module-knowledge/handler/knowledge"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
-	hertzsSwagger "github.com/hertz-contrib/swagger"
-	swaggerFiles "github.com/swaggo/files"
 )
 
 // RouterOptions 路由启动配置。
@@ -34,9 +32,9 @@ func NewRouter(
 
 	// ── 全局中间件（按顺序执行）────────────────────────────────
 	h.Use(
-		middleware.TimeoutMiddleware(30*time.Second),   // 超时控制
-		middleware.TraceMiddleware(),                    // 链路追踪 / Request ID
-		middleware.CORSMiddleware(),                     // 跨域
+		middleware.TimeoutMiddleware(30*time.Second), // 超时控制
+		middleware.TraceMiddleware(),                 // 链路追踪 / Request ID
+		middleware.CORSMiddleware(),                  // 跨域
 		middleware.AdaptiveSheddingMiddleware(middleware.SheddingOptions{ // 自适应降载
 			MaxCPU:      75,
 			MaxInFlight: 500,
@@ -45,7 +43,7 @@ func NewRouter(
 	)
 
 	// ── 基础路由 ──────────────────────────────────────────────
-	h.GET("/swagger/*any", hertzsSwagger.WrapHandler(swaggerFiles.Handler))
+	h.GET("/swagger/*any", middleware.SwaggerHandler())
 	h.GET("/health", func(ctx context.Context, c *app.RequestContext) {
 		c.JSON(http.StatusOK, map[string]string{"status": "ok"})
 	})

@@ -39,21 +39,17 @@ RUN apk add --no-cache ca-certificates tzdata
 COPY --from=builder /build/main .
 
 # 拷贝配置文件
-COPY manifest/config/config.yaml         ./config/config.yaml
+COPY manifest/config/config.dev.yaml     ./config/config.dev.yaml
 COPY manifest/config/config.prod.yaml    ./config/config.prod.yaml
-
-# 创建日志目录
-RUN mkdir -p /app/resource/logs
 
 # 运行用户（非 root）
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN mkdir -p /app/resource/logs && chown -R appuser:appgroup /app/resource/logs /app/config
 USER appuser
 
 EXPOSE 8080
 
 ENV APP_ENV=prod \
-    ADDR=:8080 \
-    LOG_LEVEL=info \
-    RESOURCE_DIR=/app/config
+    CONFIG_DIR=/app/config
 
 ENTRYPOINT ["./main"]

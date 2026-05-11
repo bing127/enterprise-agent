@@ -41,8 +41,8 @@ tidy: ## 对所有子模块执行 go mod tidy
 
 ## ── 代码生成 ─────────────────────────────────────────────────────────────────
 
-swagger: ## 生成 Swagger 文档（自动安装 swag）
-	@command -v swag >/dev/null 2>&1 || go install github.com/swaggo/swag/cmd/swag@latest
+swagger: ## 生成 Swagger 文档（自动安装 swag v2）
+	@command -v swag >/dev/null 2>&1 || go install github.com/swaggo/swag/v2/cmd/swag@v2.0.0-rc5
 	cd $(GATEWAY) && swag init -g main.go -o ../resource/docs \
 		--dir .,../module-agent/handler/agent,../module-knowledge/handler/knowledge,../module-conversation/handler/conversation,../module-core/handler,../module-core/service,../module-pkg/response,../module-pkg/appctx
 

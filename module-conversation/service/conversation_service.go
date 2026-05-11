@@ -10,15 +10,15 @@ import (
 	"github.com/cloudwego/eino/schema"
 )
 
-// ConversationService 管理会话，并通过 Eino ChatModel 驱动 AI 对话。
+// ConversationService 管理会话，并通过 Eino ToolCallingChatModel 驱动 AI 对话。
 type ConversationService struct {
 	conversationRepo repo.ConversationRepo
-	chatModel        einoModel.ChatModel // Eino 抽象 ChatModel，可对接 OpenAI / Ark 等
+	chatModel        einoModel.ToolCallingChatModel // Eino 抽象 ToolCallingChatModel，可对接 OpenAI / Ark 等
 }
 
 // NewConversationService 创建 ConversationService。
 // chatModel 可为 nil（开发/测试时跳过 AI 调用）。
-func NewConversationService(conversationRepo repo.ConversationRepo, chatModel einoModel.ChatModel) *ConversationService {
+func NewConversationService(conversationRepo repo.ConversationRepo, chatModel einoModel.ToolCallingChatModel) *ConversationService {
 	return &ConversationService{
 		conversationRepo: conversationRepo,
 		chatModel:        chatModel,

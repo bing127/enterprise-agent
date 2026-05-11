@@ -1,7 +1,10 @@
 package logger
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 	"sync"
 
 	"go.uber.org/zap"
@@ -78,26 +81,28 @@ func newLogger(cfg Config) *zap.Logger {
 	}
 
 	stdoutWriter := zapcore.AddSync(os.Stdout)
+	output := strings.TrimSpace(cfg.Output)
+	if output == "" {
+		output = "stdout"
+	}
+
+	fileWriter, fileErr := buildFileWriter(cfg)
 
 	var core zapcore.Core
-	switch cfg.Output {
+	switch output {
 	case "file":
-		fileWriter := zapcore.AddSync(&lumberjack.Logger{
-			Filename:   cfg.FilePath,
-			MaxSize:    cfg.MaxSizeMB,
-			MaxBackups: cfg.MaxBackups,
-			MaxAge:     cfg.MaxAgeDays,
-			Compress:   true,
-		})
+		if fileErr != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "logger file output disabled: %v\n", fileErr)
+			core = zapcore.NewCore(encoder, stdoutWriter, zapLevel)
+			break
+		}
 		core = zapcore.NewCore(encoder, fileWriter, zapLevel)
 	case "both":
-		fileWriter := zapcore.AddSync(&lumberjack.Logger{
-			Filename:   cfg.FilePath,
-			MaxSize:    cfg.MaxSizeMB,
-			MaxBackups: cfg.MaxBackups,
-			MaxAge:     cfg.MaxAgeDays,
-			Compress:   true,
-		})
+		if fileErr != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "logger file output disabled: %v\n", fileErr)
+			core = zapcore.NewCore(encoder, stdoutWriter, zapLevel)
+			break
+		}
 		core = zapcore.NewTee(
 			zapcore.NewCore(encoder, stdoutWriter, zapLevel),
 			zapcore.NewCore(encoder, fileWriter, zapLevel),
@@ -112,4 +117,24 @@ func newLogger(cfg Config) *zap.Logger {
 	}
 
 	return zap.New(core, opts...)
+}
+
+func buildFileWriter(cfg Config) (zapcore.WriteSyncer, error) {
+	path := strings.TrimSpace(cfg.FilePath)
+	if path == "" {
+		return nil, fmt.Errorf("empty log file path")
+	}
+	dir := filepath.Dir(path)
+	if dir != "" && dir != "." {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return nil, err
+		}
+	}
+	return zapcore.AddSync(&lumberjack.Logger{
+		Filename:   path,
+		MaxSize:    cfg.MaxSizeMB,
+		MaxBackups: cfg.MaxBackups,
+		MaxAge:     cfg.MaxAgeDays,
+		Compress:   true,
+	}), nil
 }

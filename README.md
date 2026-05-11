@@ -29,7 +29,7 @@ enterprise-agent/
 ├── go.work                    # Go Workspace，统一管理所有子模块
 ├── Makefile                   # 常用命令入口
 ├── manifest/
-│   ├── config/                # 配置文件（config.yaml / dev / prod）
+│   ├── config/                # 配置文件（config.dev.yaml / config.prod.yaml）
 │   └── docker/                # Dockerfile + docker-compose.yaml
 │
 ├── module-pkg/                # 共享基础包（无业务依赖）
@@ -179,12 +179,10 @@ make run        # 编译并以生产模式运行
 | 变量 | 默认值 | 说明 |
 |------|--------|------|
 | `APP_ENV` | `dev` | 运行环境（`dev` / `prod`） |
-| `ADDR` | `:8080` | 监听地址 |
-| `LOG_LEVEL` | `info` | 日志级别（`debug` / `info` / `warn` / `error`） |
-| `JWT_SECRET_KEY` | *(见配置文件)* | JWT 签名密钥，**生产环境必须通过此变量注入** |
-| `RESOURCE_DIR` | `./manifest/config` | 配置文件目录 |
+| `CONFIG_DIR` | 自动探测 `manifest/config` 或 `../manifest/config` | 配置文件目录 |
+| `JWT_SECRET_KEY` | *(可选)* | 生产环境推荐通过该变量注入 JWT 密钥（在 `config.prod.yaml` 中通过 `${JWT_SECRET_KEY}` 引用） |
 
-配置文件优先级：环境变量 > `config.{APP_ENV}.yaml` > `config.yaml`
+配置文件：仅加载 `config.{APP_ENV}.yaml`（`APP_ENV` 仅支持 `dev` / `prod`）
 
 ---
 

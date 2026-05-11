@@ -2,12 +2,17 @@
 # 敏感字段（密钥、密码）应通过环境变量注入，切勿硬编码
 
 app:
+  name: enterprise-agent
   env: prod
+  port: 8080
   debug: false
 
 server:
+  host: "0.0.0.0"
+  port: 8080
   read_timeout: 60s
   write_timeout: 60s
+  max_request_body_size: 10485760
 
 auth:
   secret_key: "${JWT_SECRET_KEY}"   # 通过环境变量注入
@@ -23,19 +28,33 @@ elasticsearch:
 weaviate:
   scheme: "https"
   host: "${WEAVIATE_HOST}"
+  grpc_port: 50051
   api_key: "${WEAVIATE_API_KEY}"
 
 redis:
   addr: "${REDIS_ADDR}"
   password: "${REDIS_PASSWORD}"
+  db: 0
   pool_size: 50
+  dial_timeout: 5s
+  read_timeout: 3s
+  write_timeout: 3s
 
 ai:
+  provider: "openai"
   openai:
     api_key: "${OPENAI_API_KEY}"
+    base_url: "https://api.openai.com/v1"
     model: "gpt-4o"
     temperature: 0.5
     max_tokens: 4096
+  ark:
+    api_key: ""
+    endpoint_id: ""
+    region: "cn-beijing"
+  qwen:
+    api_key: ""
+    model: "qwen-max"
 
 log:
   level: "warn"

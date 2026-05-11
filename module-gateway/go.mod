@@ -4,6 +4,7 @@ go 1.26
 
 require (
 	github.com/bing127/enterprise-agent/module-agent v0.0.0
+	github.com/bing127/enterprise-agent/module-config v0.0.0
 	github.com/bing127/enterprise-agent/module-conversation v0.0.0
 	github.com/bing127/enterprise-agent/module-core v0.0.0
 	github.com/bing127/enterprise-agent/module-infra v0.0.0
@@ -13,9 +14,9 @@ require (
 	github.com/cloudwego/hertz v0.10.4
 	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.7.0
-	github.com/hertz-contrib/swagger v0.1.1
 	github.com/sony/gobreaker v0.5.0
-	github.com/swaggo/files v1.0.1
+	github.com/swaggo/files/v2 v2.0.2
+	github.com/swaggo/swag/v2 v2.0.0-rc5
 	go.uber.org/zap v1.27.0
 )
 
@@ -72,9 +73,16 @@ require (
 	github.com/oklog/ulid/v2 v2.1.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.3.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/sagikazarmark/locafero v0.11.0 // indirect
 	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/slongfield/pyfmt v0.0.0-20220222012616-ea85ff4c361f // indirect
-	github.com/swaggo/swag v1.16.6 // indirect
+	github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 // indirect
+	github.com/spf13/afero v1.15.0 // indirect
+	github.com/spf13/cast v1.10.0 // indirect
+	github.com/spf13/pflag v1.0.10 // indirect
+	github.com/spf13/viper v1.21.0 // indirect
+	github.com/subosito/gotenv v1.6.0 // indirect
+	github.com/sv-tools/openapi v0.4.0 // indirect
 	github.com/tidwall/gjson v1.19.0 // indirect
 	github.com/tidwall/match v1.2.0 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
@@ -92,10 +100,8 @@ require (
 	golang.org/x/arch v0.27.0 // indirect
 	golang.org/x/crypto v0.51.0 // indirect
 	golang.org/x/exp v0.0.0-20260508232706-74f9aab9d74a // indirect
-	golang.org/x/mod v0.36.0 // indirect
 	golang.org/x/net v0.54.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
-	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.44.0 // indirect
 	golang.org/x/text v0.37.0 // indirect
 	golang.org/x/tools v0.45.0 // indirect
@@ -108,6 +114,7 @@ require (
 
 replace (
 	github.com/bing127/enterprise-agent/module-agent => ../module-agent
+	github.com/bing127/enterprise-agent/module-config => ../module-config
 	github.com/bing127/enterprise-agent/module-conversation => ../module-conversation
 	github.com/bing127/enterprise-agent/module-core => ../module-core
 	github.com/bing127/enterprise-agent/module-infra => ../module-infra
