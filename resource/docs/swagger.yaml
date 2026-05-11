@@ -1,0 +1,747 @@
+basePath: /
+definitions:
+  agent.AgentResponse:
+    properties:
+      created_at:
+        type: integer
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      status:
+        type: string
+      updated_at:
+        type: integer
+    type: object
+  agent.CreateAgentRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      status:
+        type: string
+    type: object
+  agent.UpdateAgentRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      status:
+        type: string
+    type: object
+  appctx.UserInfo:
+    properties:
+      email:
+        type: string
+      nickname:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  conversation.ConversationResponse:
+    properties:
+      agent_id:
+        type: string
+      created_at:
+        type: integer
+      id:
+        type: string
+      messages:
+        items:
+          $ref: '#/definitions/conversation.MessageResponse'
+        type: array
+      updated_at:
+        type: integer
+      user_id:
+        type: string
+    type: object
+  conversation.CreateConversationRequest:
+    properties:
+      agent_id:
+        type: string
+      user_id:
+        type: string
+    type: object
+  conversation.MessageResponse:
+    properties:
+      content:
+        type: string
+      id:
+        type: string
+      role:
+        type: string
+      timestamp:
+        type: integer
+    type: object
+  conversation.SendMessageRequest:
+    properties:
+      content:
+        type: string
+    type: object
+  conversation.SendMessageResponse:
+    properties:
+      reply:
+        type: string
+    type: object
+  handler.loginBody:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  handler.registerBody:
+    properties:
+      code:
+        type: string
+      email:
+        type: string
+      nickname:
+        type: string
+      password:
+        type: string
+    type: object
+  handler.sendCodeBody:
+    properties:
+      code_type:
+        type: string
+      email:
+        type: string
+    type: object
+  knowledge.CreateKnowledgeRequest:
+    properties:
+      content:
+        type: string
+      description:
+        type: string
+      title:
+        type: string
+    type: object
+  knowledge.KnowledgeResponse:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: integer
+      description:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: integer
+    type: object
+  knowledge.UpdateKnowledgeRequest:
+    properties:
+      content:
+        type: string
+      description:
+        type: string
+      title:
+        type: string
+    type: object
+  response.Code:
+    enum:
+    - 0
+    - 40001
+    - 40101
+    - 40102
+    - 40301
+    - 40401
+    - 40901
+    - 42901
+    - 50001
+    - 50301
+    type: integer
+    x-enum-comments:
+      CodeBadRequest: 请求参数错误 / 校验失败
+      CodeConflict: 资源冲突（如邮箱已注册）
+      CodeForbidden: 无权限
+      CodeInternalError: 服务内部错误
+      CodeNotFound: 资源不存在
+      CodeServiceUnavailable: 服务不可用（熔断 / 降载）
+      CodeTokenExpired: Token 已过期
+      CodeTooManyRequests: 请求过于频繁
+      CodeUnauthorized: 未认证 / Token 无效
+    x-enum-varnames:
+    - CodeSuccess
+    - CodeBadRequest
+    - CodeUnauthorized
+    - CodeTokenExpired
+    - CodeForbidden
+    - CodeNotFound
+    - CodeConflict
+    - CodeTooManyRequests
+    - CodeInternalError
+    - CodeServiceUnavailable
+  response.R:
+    properties:
+      code:
+        $ref: '#/definitions/response.Code'
+      data: {}
+      msg:
+        type: string
+      success:
+        type: boolean
+    type: object
+  service.LoginResponse:
+    properties:
+      expire_at:
+        type: string
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/service.UserDTO'
+    type: object
+  service.UserDTO:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      nickname:
+        type: string
+      status:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: Enterprise Agent Team
+  description: 企业级智能 Agent 系统 API。HTTP 层基于 CloudWeGo Hertz，AI 对话层基于 CloudWeGo Eino。
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Enterprise Agent API
+  version: "1.0"
+paths:
+  /api/v1/agents:
+    get:
+      description: 获取所有 Agent
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/agent.AgentResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 获取 Agent 列表
+      tags:
+      - agents
+    post:
+      consumes:
+      - application/json
+      description: 创建一个新的企业智能 Agent
+      parameters:
+      - description: Agent 信息
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/agent.CreateAgentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/agent.AgentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 创建 Agent
+      tags:
+      - agents
+  /api/v1/agents/{id}:
+    delete:
+      description: 根据 ID 删除 Agent
+      parameters:
+      - description: Agent ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 删除 Agent
+      tags:
+      - agents
+    get:
+      description: 根据 ID 获取 Agent 详情
+      parameters:
+      - description: Agent ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/agent.AgentResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 获取 Agent
+      tags:
+      - agents
+    put:
+      consumes:
+      - application/json
+      description: 根据 ID 更新 Agent 信息
+      parameters:
+      - description: Agent ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Agent 信息
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/agent.UpdateAgentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/agent.AgentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 更新 Agent
+      tags:
+      - agents
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: 邮箱 + 密码登录，返回 JWT 令牌
+      parameters:
+      - description: 请求体
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.loginBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.R'
+            - properties:
+                data:
+                  $ref: '#/definitions/service.LoginResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.R'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.R'
+      summary: 用户登录
+      tags:
+      - auth
+  /api/v1/auth/me:
+    get:
+      description: 从 JWT 中解析并返回当前登录用户的基本信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.R'
+            - properties:
+                data:
+                  $ref: '#/definitions/appctx.UserInfo'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.R'
+      security:
+      - BearerAuth: []
+      summary: 获取当前用户信息
+      tags:
+      - auth
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: 验证邮箱验证码后创建用户账号
+      parameters:
+      - description: 请求体
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.registerBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.R'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.R'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.R'
+      summary: 邮箱注册
+      tags:
+      - auth
+  /api/v1/auth/send-code:
+    post:
+      consumes:
+      - application/json
+      description: 向指定邮箱发送 6 位数字验证码，有效期 10 分钟
+      parameters:
+      - description: 请求体
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.sendCodeBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.R'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.R'
+      summary: 发送邮箱验证码
+      tags:
+      - auth
+  /api/v1/conversations:
+    post:
+      consumes:
+      - application/json
+      description: 创建一个新的对话会话
+      parameters:
+      - description: 会话信息
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/conversation.CreateConversationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/conversation.ConversationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 创建会话
+      tags:
+      - conversations
+  /api/v1/conversations/{id}:
+    get:
+      description: 根据 ID 获取会话详情
+      parameters:
+      - description: 会话 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/conversation.ConversationResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 获取会话
+      tags:
+      - conversations
+  /api/v1/conversations/{id}/messages:
+    post:
+      consumes:
+      - application/json
+      description: 向指定会话发送用户消息，通过 Eino 驱动 AI 模型生成回复
+      parameters:
+      - description: 会话 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 消息内容
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/conversation.SendMessageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/conversation.SendMessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 发送消息（AI 对话）
+      tags:
+      - conversations
+  /api/v1/knowledge:
+    get:
+      description: 获取所有知识库条目
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/knowledge.KnowledgeResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 获取知识库列表
+      tags:
+      - knowledge
+    post:
+      consumes:
+      - application/json
+      description: 创建一个新的知识库条目
+      parameters:
+      - description: 知识库信息
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/knowledge.CreateKnowledgeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/knowledge.KnowledgeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 创建知识库条目
+      tags:
+      - knowledge
+  /api/v1/knowledge/{id}:
+    delete:
+      description: 根据 ID 删除知识库条目
+      parameters:
+      - description: 知识库 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 删除知识库条目
+      tags:
+      - knowledge
+    get:
+      description: 根据 ID 获取知识库条目详情
+      parameters:
+      - description: 知识库 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/knowledge.KnowledgeResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 获取知识库条目
+      tags:
+      - knowledge
+    put:
+      consumes:
+      - application/json
+      description: 根据 ID 更新知识库条目
+      parameters:
+      - description: 知识库 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 知识库信息
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/knowledge.UpdateKnowledgeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/knowledge.KnowledgeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 更新知识库条目
+      tags:
+      - knowledge
+securityDefinitions:
+  BearerAuth:
+    description: 格式：Bearer <token>
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
